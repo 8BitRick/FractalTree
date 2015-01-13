@@ -29,12 +29,14 @@ cls = () ->
   c.fillStyle = 'black'
   c.fillRect.apply(c, whole_canvas)
 
+draw_offset = 150
+
 draw_line = (line) ->
   c.beginPath()
   new_pos = draw_trans(line[0])
-  c.moveTo(new_pos.x,new_pos.y)
+  c.moveTo(new_pos.x,new_pos.y-draw_offset)
   new_pos = draw_trans(line[1])
-  c.lineTo(new_pos.x,new_pos.y)
+  c.lineTo(new_pos.x,new_pos.y-draw_offset)
   c.stroke()
 
 vec_dot = (v1, v2) ->
@@ -49,6 +51,11 @@ vec_xform = (v, xform) ->
 just_x = {x: 1, y:0, z:0}
 just_y = {x: 0, y:1, z:0}
 
+mag_xy = (xy) -> Math.sqrt(xy.x * xy.x + xy.y * xy.y)
+norm_xy = (xy) ->
+  m = mag_xy(xy)
+  {x: xy.x / m, y: xy.y / m}
+
 draw_split = (xform, repeat) ->
   sq3_2 = Math.sqrt(3)/2
   base_l = {x: -sq3_2, y: 0.5, z:1.0}
@@ -59,11 +66,13 @@ draw_split = (xform, repeat) ->
   draw_line([new_o, new_l])
   draw_line([new_o, new_r])
   if(repeat > 0)
-    new_x = {x: new_l.y, y: -new_l.x, z: new_l.x}
-    new_y = {x: new_l.x, y: new_l.y, z: new_l.y}
+    mag_l = mag_xy(new_l)
+    new_x = {x: new_l.y / mag_l, y: -new_l.x / mag_l, z: new_l.x}
+    new_y = {x: new_l.x / mag_l, y: new_l.y / mag_l, z: new_l.y}
     draw_split([new_x, new_y], repeat - 1)
-    new_x = {x: new_r.y, y: -new_r.x, z: new_r.x}
-    new_y = {x: new_r.x, y: new_r.y, z: new_r.y}
+    mag_r = mag_xy(new_r)
+    new_x = {x: new_r.y / mag_r, y: -new_r.x / mag_r, z: new_r.x}
+    new_y = {x: new_r.x / mag_r, y: new_r.y / mag_r, z: new_r.y}
     draw_split([new_x, new_y], repeat - 1)
 
 render = ->
@@ -82,7 +91,7 @@ render = ->
 #  draw_line([origin, base_r])
 
   xform = [just_x, just_y]
-  draw_split(xform, 2)
+  draw_split(xform, 6)
 
 #  c.beginPath()
 #  new_pos = draw_trans(t)
