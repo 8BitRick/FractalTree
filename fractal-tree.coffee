@@ -29,21 +29,60 @@ cls = () ->
   c.fillStyle = 'black'
   c.fillRect.apply(c, whole_canvas)
 
+draw_line = (line) ->
+  c.beginPath()
+  new_pos = draw_trans(line[0])
+  c.moveTo(new_pos.x,new_pos.y)
+  new_pos = draw_trans(line[1])
+  c.lineTo(new_pos.x,new_pos.y)
+  c.stroke()
+
+vec_dot = (v1, v2) ->
+  v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+#  {x: v1.x * v2.x, y: v1.y * v2.y, z: v1.z * v2.z}
+
+vec_xform = (v, xform) ->
+  {x: vec_dot(v, {x: xform[0].x, y: xform[1].x, z: xform[0].z}),
+  y: vec_dot(v, {x: xform[0].y, y: xform[1].y, z: xform[1].z}),
+  z: xform[0].z}
+
+draw_split = (xform) ->
+  sq3_2 = Math.sqrt(3)/2
+  base_l = {x: -sq3_2, y: 0.5, z:1.0}
+  base_r = {x: sq3_2, y: 0.5, z:1.0}
+  new_l = vec_xform(base_l, xform)
+  new_r = vec_xform(base_r, xform)
+  new_o = {x: xform[0].z, y: xform[1].z, z:0}
+  draw_line([new_o, new_l])
+  draw_line([new_o, new_r])
+
 render = ->
   cls()
   c.fillStyle = '#FFAA33'
   c.strokeStyle = '#FFAA33'
   c.lineWidth = 20
-  w = 2
-  h = 5
-  t = {x: 0, y: 0, z:0}
+#  w = 2
+#  h = 5
+#  origin = {x: 0, y: 0, z:0}
+#  sq3_2 = Math.sqrt(3)/2
+#  base_l = {x: -sq3_2, y: 0.5, z:0.0}
+#  base_r = {x: sq3_2, y: 0.5, z:0.0}
+#  draw_line([origin, {x:0, y:5, z:0}])
+#  draw_line([origin, base_l])
+#  draw_line([origin, base_r])
 
-  c.beginPath()
-  new_pos = draw_trans(t)
-  c.moveTo(new_pos.x,new_pos.y)
-  new_pos = draw_trans({x:0, y:5, z:0})
-  c.lineTo(new_pos.x,new_pos.y)
-  c.stroke()
+  just_x = {x: 1, y:0, z:0}
+  just_y = {x: 0, y:1, z:5}
+
+  xform = [just_x, just_y]
+  draw_split(xform)
+
+#  c.beginPath()
+#  new_pos = draw_trans(t)
+#  c.moveTo(new_pos.x,new_pos.y)
+#  new_pos = draw_trans({x:0, y:5, z:0})
+#  c.lineTo(new_pos.x,new_pos.y)
+#  c.stroke()
 #c.fillRect(new_pos.x, new_pos.y, 20, -50 )
 
 setInterval(render,30);
