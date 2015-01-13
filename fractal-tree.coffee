@@ -46,7 +46,10 @@ vec_xform = (v, xform) ->
   y: vec_dot(v, {x: xform[0].y, y: xform[1].y, z: xform[1].z}),
   z: xform[0].z}
 
-draw_split = (xform) ->
+just_x = {x: 1, y:0, z:0}
+just_y = {x: 0, y:1, z:0}
+
+draw_split = (xform, repeat) ->
   sq3_2 = Math.sqrt(3)/2
   base_l = {x: -sq3_2, y: 0.5, z:1.0}
   base_r = {x: sq3_2, y: 0.5, z:1.0}
@@ -55,12 +58,19 @@ draw_split = (xform) ->
   new_o = {x: xform[0].z, y: xform[1].z, z:0}
   draw_line([new_o, new_l])
   draw_line([new_o, new_r])
+  if(repeat > 0)
+    new_x = {x: new_l.y, y: -new_l.x, z: new_l.x}
+    new_y = {x: new_l.x, y: new_l.y, z: new_l.y}
+    draw_split([new_x, new_y], repeat - 1)
+    new_x = {x: new_r.y, y: -new_r.x, z: new_r.x}
+    new_y = {x: new_r.x, y: new_r.y, z: new_r.y}
+    draw_split([new_x, new_y], repeat - 1)
 
 render = ->
   cls()
   c.fillStyle = '#FFAA33'
   c.strokeStyle = '#FFAA33'
-  c.lineWidth = 20
+  c.lineWidth = 2
 #  w = 2
 #  h = 5
 #  origin = {x: 0, y: 0, z:0}
@@ -71,11 +81,8 @@ render = ->
 #  draw_line([origin, base_l])
 #  draw_line([origin, base_r])
 
-  just_x = {x: 1, y:0, z:0}
-  just_y = {x: 0, y:1, z:5}
-
   xform = [just_x, just_y]
-  draw_split(xform)
+  draw_split(xform, 2)
 
 #  c.beginPath()
 #  new_pos = draw_trans(t)
